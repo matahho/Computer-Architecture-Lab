@@ -1,0 +1,94 @@
+module TopLevel(
+    input clock, rst
+    );
+	 
+	 
+    wire clk;
+    assign clk = clock;
+
+    
+    // IF
+    wire [31:0] pcOutIf, instOutIf;
+    // IF-ID
+    wire [31:0] pcOutIfId, instOutIfId;
+
+    // ID
+    wire [31:0] pcOutId;
+    wire [3:0] aluCmdOutId;
+    wire memReadOutId, memWriteOutId, wbEnOutId, branchOutId, sOutId;
+    wire [31:0] reg1OutId, reg2OutId;
+    wire immOutId;
+    wire [11:0] shiftOperandOutId;
+    wire [23:0] imm24OutId;
+    wire [3:0] destOutId;
+    wire [3:0] src1OutId, src2OutId;
+    // ID-EX
+    wire [31:0] pcOutIdEx;
+    wire [3:0] aluCmdOutIdEx;
+    wire memReadOutIdEx, memWriteOutIdEx, wbEnOutIdEx, branchOutIdEx, sOutIdEx;
+    wire [31:0] reg1OutIdEx, reg2OutIdEx;
+    wire [3:0] src1OutIdEx, src2OutIdEx;
+    wire immOutIdEx;
+    wire [11:0] shiftOperandOutIdEx;
+    wire [23:0] imm24OutIdEx;
+    wire [3:0] destOutIdEx;
+    wire carryOut;
+	 
+
+	// IF stage  
+	StageIf stageIf(
+    .clk(clock), .rst(rst),
+    .branchTaken(1'b0),
+	 .freeze(1'b0),
+    .branchAddr(32'b0),
+    .pc(pcOutIf),
+	 .instruction(instOutIf)
+	);
+	
+	// regs between If & Id
+	RegsIfId regsIf(
+		.clk(clock), .rst(rst),
+		.freeze(1'b0),
+		.flush(1'b0),
+		.pcIn(pcOutIf), .instructionIn(instOutIf),
+		.pcOut(pcOutIfId) , .instructionOut(instOutIfId)
+	
+	);
+
+    // ID stage
+	StageId stId(
+        .clk(clk), .rst(rst),
+        .pcIn(pcOutIfId), .inst(instOutIfId),
+        .status(4'b0) ,// .status(status),
+        .wbWbEn(0) , .wbValue(32'b0) , .wbDest(4'b0), //.wbWbEn(wbEn), .wbValue(wbValue), .wbDest(wbDest),
+        .hazard(0), //.hazard(hazard),
+        .pcOut(pcOutId),
+        .aluCmd(aluCmdOutId), .memRead(memReadOutId), .memWrite(memWriteOutId),
+        .wbEn(wbEnOutId), .branch(branchOutId), .s(sOutId),
+        .reg1(reg1OutId), .reg2(reg2OutId),
+        .imm(immOutId), .shiftOperand(shiftOperandOutId), .imm24(imm24OutId), .dest(destOutId),
+        .src1(src1OutId), .src2(src2OutId), .hazardTwoSrc(hazardTwoSrc)
+    );
+
+    // regs between ID & EX
+    RegsIdEx regsId(
+        .clk(clk), .rst(rst),
+        .pcIn(pcOutId),
+        .aluCmdIn(aluCmdOutId), .memReadIn(memReadOutId), .memWriteIn(memWriteOutId),
+        .wbEnIn(wbEnOutId), .branchIn(branchOutId), .sIn(sOutId),
+        .reg1In(reg1OutId), .reg2In(reg2OutId),
+        .immIn(immOutId), .shiftOperandIn(shiftOperandOutId), .imm24In(imm24OutId), .destIn(destOutId),
+        .carryIn(carryIn), .src1In(src1OutId), .src2In(src2OutId),
+        .flush(0), //.flush(branchTaken)
+        .freeze(0), //.freeze(ramFreeze),
+        .pcOut(pcOutIdEx),
+        .aluCmdOut(aluCmdOutIdEx), .memReadOut(memReadOutIdEx), .memWriteOut(memWriteOutIdEx),
+        .wbEnOut(wbEnOutIdEx), .branchOut(branchOutIdEx), .sOut(sOutIdEx),
+        .reg1Out(reg1OutIdEx), .reg2Out(reg2OutIdEx),
+        .immOut(immOutIdEx), .shiftOperandOut(shiftOperandOutIdEx), .imm24Out(imm24OutIdEx), .destOut(destOutIdEx),
+        .src1Out(src1OutIdEx), .src2Out(src2OutIdEx),
+        .carryOut(carryOut)
+    );
+	
+	 
+endmodule
