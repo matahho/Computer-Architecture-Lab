@@ -6,7 +6,6 @@ module StageEx(
     input [11:0] shifterOperand,
     input [23:0] signedImm24,
     input [3:0] dest,
-    input [1:0] selSrc1, selSrc2,
     input [31:0] valMem, valWb,
     output wbEnOut, memREnOut, memWEnOut, branchTakenOut,
     output [31:0] aluRes, exeValRm, branchAddr,

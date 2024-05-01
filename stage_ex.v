@@ -41,7 +41,7 @@ module StageEx(
     );
 
     ALU #(32) alu(
-        .a(val1),
+        .a(aluSrc1),
         .b(val2),
         .carryIn(carryIn),
         .exeCmd(exeCmd),
@@ -57,4 +57,22 @@ module StageEx(
         .out(branchAddr)
     );
 
+    // Forwarding Unit
+    Mux4To1 #(32) muxSrc1(
+        .a00(val1),
+        .a01(valMem),
+        .a10(valWb),
+        .a11(32'b0),
+        .sel(selSrc1),
+        .out(aluSrc1)
+    );
+
+    Mux4To1 #(32) muxSrc2(
+        .a00(valRm),
+        .a01(valMem),
+        .a10(valWb),
+        .a11(32'b0),
+        .sel(selSrc2),
+        .out(aluSrc2)
+    );
 endmodule
